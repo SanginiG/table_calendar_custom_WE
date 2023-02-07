@@ -17,8 +17,6 @@ import 'table_calendar_base.dart';
 import 'widgets/calendar_header.dart';
 import 'widgets/cell_content.dart';
 
-final customWidgetKey = GlobalKey<TableCalendarState>();
-
 /// Signature for `onDaySelected` callback. Contains the selected day and focused day.
 typedef OnDaySelected = void Function(
     DateTime selectedDay, DateTime focusedDay);
@@ -33,9 +31,6 @@ enum RangeSelectionMode { disabled, toggledOff, toggledOn, enforced }
 
 /// Highly customizable, feature-packed Flutter calendar with gestures, animations and multiple formats.
 class TableCalendar<T> extends StatefulWidget {
-  final Stream shouldTriggerChange;
-  Key key;
-
   /// Locale to format `TableCalendar` dates with, for example: `'en_US'`.
   ///
   /// If nothing is provided, a default locale will be used.
@@ -220,7 +215,6 @@ class TableCalendar<T> extends StatefulWidget {
     required DateTime firstDay,
     required DateTime lastDay,
     DateTime? currentDay,
-    required this.shouldTriggerChange,
     this.locale,
     this.rangeStartDay,
     this.rangeEndDay,
@@ -316,8 +310,6 @@ class TableCalendarState<T> extends State<TableCalendar<T>> {
     super.initState();
     _focusedDay = ValueNotifier(widget.focusedDay);
     _rangeSelectionMode = widget.rangeSelectionMode;
-    streamSubscription = widget.shouldTriggerChange
-        .listen(([index1, index2]) => onMonthTap(index1, index2));
   }
 
   @override
@@ -334,11 +326,6 @@ class TableCalendarState<T> extends State<TableCalendar<T>> {
 
     if (widget.rangeStartDay == null && widget.rangeEndDay == null) {
       _firstSelectedDay = null;
-    }
-    if (widget.shouldTriggerChange != oldWidget.shouldTriggerChange) {
-      streamSubscription.cancel();
-      streamSubscription = widget.shouldTriggerChange
-          .listen(([index1, index2]) => onMonthTap(index1, index2));
     }
   }
 
