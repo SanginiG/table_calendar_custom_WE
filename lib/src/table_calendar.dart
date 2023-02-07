@@ -1,6 +1,7 @@
 // Copyright 2019 Aleksander Woźniak
 // SPDX-License-Identifier: Apache-2.0
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/widgets.dart';
@@ -30,6 +31,8 @@ enum RangeSelectionMode { disabled, toggledOff, toggledOn, enforced }
 
 /// Highly customizable, feature-packed Flutter calendar with gestures, animations and multiple formats.
 class TableCalendar<T> extends StatefulWidget {
+  final Stream shouldTriggerChange;
+
   /// Locale to format `TableCalendar` dates with, for example: `'en_US'`.
   ///
   /// If nothing is provided, a default locale will be used.
@@ -186,6 +189,9 @@ class TableCalendar<T> extends StatefulWidget {
   /// Called whenever any disabled day gets tapped.
   final void Function(DateTime day)? onDisabledDayTapped;
 
+  ///Called whenever any month on top is pressed, takes user to that month page
+  final void Function(int index1, int index2)? onMonthTap;
+
   /// Called whenever any disabled day gets long pressed.
   final void Function(DateTime day)? onDisabledDayLongPressed;
 
@@ -211,6 +217,7 @@ class TableCalendar<T> extends StatefulWidget {
     required DateTime firstDay,
     required DateTime lastDay,
     DateTime? currentDay,
+    required this.shouldTriggerChange,
     this.locale,
     this.rangeStartDay,
     this.rangeEndDay,
@@ -258,6 +265,7 @@ class TableCalendar<T> extends StatefulWidget {
     this.onHeaderTapped,
     this.onHeaderLongPressed,
     this.onPageChanged,
+    this.onMonthTap,
     this.onFormatChanged,
     this.onCalendarCreated,
   })  : assert(availableCalendarFormats.keys.contains(calendarFormat)),
@@ -280,13 +288,33 @@ class _TableCalendarState<T> extends State<TableCalendar<T>> {
   late final PageController _pageController;
   late final ValueNotifier<DateTime> _focusedDay;
   late RangeSelectionMode _rangeSelectionMode;
+  late StreamSubscription streamSubscription;
   DateTime? _firstSelectedDay;
+  void onMonthTap(int index1, int index2) {
+    if (index2 > index1) {
+      for (int i = 0; i < index2 - index1; i++) {
+        _pageController.nextPage(
+          duration: widget.pageAnimationDuration,
+          curve: widget.pageAnimationCurve,
+        );
+      }
+    } else {
+      for (int i = 0; i < index1 - index2; i++) {
+        _pageController.previousPage(
+          duration: widget.pageAnimationDuration,
+          curve: widget.pageAnimationCurve,
+        );
+      }
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     _focusedDay = ValueNotifier(widget.focusedDay);
     _rangeSelectionMode = widget.rangeSelectionMode;
+    streamSubscription = widget.shouldTriggerChange
+        .listen(([index1, index2]) => onMonthTap(index1, index2));
   }
 
   @override
@@ -304,11 +332,17 @@ class _TableCalendarState<T> extends State<TableCalendar<T>> {
     if (widget.rangeStartDay == null && widget.rangeEndDay == null) {
       _firstSelectedDay = null;
     }
+    if (widget.shouldTriggerChange != oldWidget.shouldTriggerChange) {
+      streamSubscription.cancel();
+      streamSubscription = widget.shouldTriggerChange
+          .listen(([index1, index2]) => onMonthTap(index1, index2));
+    }
   }
 
   @override
   void dispose() {
     _focusedDay.dispose();
+    streamSubscription.cancel();
     super.dispose();
   }
 
