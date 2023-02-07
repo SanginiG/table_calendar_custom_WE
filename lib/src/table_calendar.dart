@@ -281,10 +281,10 @@ class TableCalendar<T> extends StatefulWidget {
         super(key: key);
 
   @override
-  _TableCalendarState<T> createState() => _TableCalendarState<T>();
+  TableCalendarState<T> createState() => TableCalendarState<T>();
 }
 
-class _TableCalendarState<T> extends State<TableCalendar<T>> {
+class TableCalendarState<T> extends State<TableCalendar<T>> {
   late final PageController _pageController;
   late final ValueNotifier<DateTime> _focusedDay;
   late RangeSelectionMode _rangeSelectionMode;
@@ -293,14 +293,14 @@ class _TableCalendarState<T> extends State<TableCalendar<T>> {
   void onMonthTap(int index1, int index2) {
     if (index2 > index1) {
       for (int i = 0; i < index2 - index1; i++) {
-        _pageController.nextPage(
+        _pageController.previousPage(
           duration: widget.pageAnimationDuration,
           curve: widget.pageAnimationCurve,
         );
       }
     } else {
       for (int i = 0; i < index1 - index2; i++) {
-        _pageController.previousPage(
+        _pageController.nextPage(
           duration: widget.pageAnimationDuration,
           curve: widget.pageAnimationCurve,
         );
