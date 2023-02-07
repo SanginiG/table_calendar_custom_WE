@@ -34,6 +34,7 @@ enum RangeSelectionMode { disabled, toggledOff, toggledOn, enforced }
 /// Highly customizable, feature-packed Flutter calendar with gestures, animations and multiple formats.
 class TableCalendar<T> extends StatefulWidget {
   final Stream shouldTriggerChange;
+  Key key = customWidgetKey;
 
   /// Locale to format `TableCalendar` dates with, for example: `'en_US'`.
   ///
@@ -270,6 +271,7 @@ class TableCalendar<T> extends StatefulWidget {
     this.onMonthTap,
     this.onFormatChanged,
     this.onCalendarCreated,
+    required this.key,
   })  : assert(availableCalendarFormats.keys.contains(calendarFormat)),
         assert(availableCalendarFormats.length <= CalendarFormat.values.length),
         assert(weekendDays.isNotEmpty
