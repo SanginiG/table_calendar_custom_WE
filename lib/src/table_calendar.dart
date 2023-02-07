@@ -17,6 +17,8 @@ import 'table_calendar_base.dart';
 import 'widgets/calendar_header.dart';
 import 'widgets/cell_content.dart';
 
+final customWidgetKey = GlobalKey<TableCalendarState>();
+
 /// Signature for `onDaySelected` callback. Contains the selected day and focused day.
 typedef OnDaySelected = void Function(
     DateTime selectedDay, DateTime focusedDay);
